@@ -1,0 +1,8 @@
+---
+
+- hosts: '{{ hosts }}'
+  vars:
+    opdk_version: 4.16.09
+  roles:
+  - apigee-opdk-setup-default-settings
+  - { role: apigee-opdk-update-component, apigee_component: '{{ upgrade_component }}' }

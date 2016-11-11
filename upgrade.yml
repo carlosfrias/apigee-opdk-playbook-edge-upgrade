@@ -1,0 +1,69 @@
+---
+- include: configuration/update_cache.yml
+
+- include: components/opdk-upgrade-component.yml
+  vars:
+    hosts: ds[0]
+    upgrade_component: ds
+
+- include: components/opdk-upgrade-component.yml
+  vars:
+    hosts: ms[0]
+    upgrade_component: ms
+
+- include: components/opdk-upgrade-reachability-component.yml
+  vars:
+    hosts: rmp[0]
+    server_type: router
+    upgrade_component: r
+
+#- hosts: rmp
+#  tasks:
+#  - include: configuration/opdk-set-reachable.yml
+#    vars:
+#      hosts: '{{ inventory_hostname }}'
+#      reachability: 'false'
+#
+#  - include: components/opdk-upgrade-component.yml
+#    vars:
+#      hosts: '{{ inventory_hostname }}'
+#      upgrade_component: rmp
+#
+#  - include: configuration/opdk-set-reachable.yml
+#    vars:
+#      hosts: '{{ inventory_hostname }}'
+#      reachability: 'true'
+#
+#- hosts: qpid
+#  tasks:
+#  - include: configuration/opdk-set-reachable.yml
+#    vars:
+#      hosts: '{{ inventory_hostname }}'
+#      reachability: 'false'
+#
+#  - include: components/opdk-upgrade-component.yml
+#    vars:
+#      hosts: '{{ inventory_hostname }}'
+#      upgrade_component: qs
+#
+#  - include: configuration/opdk-set-reachable.yml
+#    vars:
+#      hosts: '{{ inventory_hostname }}'
+#      reachability: 'true'
+#
+#- hosts: pg
+#  tasks:
+#  - include: configuration/opdk-set-reachable.yml
+#    vars:
+#      hosts: '{{ inventory_hostname }}'
+#      reachability: 'false'
+#
+#  - include: components/opdk-upgrade-component.yml
+#    vars:
+#      hosts: '{{ inventory_hostname }}'
+#      upgrade_component: ps
+#
+#  - include: configuration/opdk-set-reachable.yml
+#    vars:
+#      hosts: '{{ inventory_hostname }}'
+#      reachability: 'true'

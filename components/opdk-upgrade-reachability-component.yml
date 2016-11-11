@@ -1,0 +1,11 @@
+---
+- hosts: '{{ hosts }}'
+  vars_files:
+  - ~/.apigee/credentials.yml
+  vars:
+    opdk_version: 4.16.09
+  roles:
+  - apigee-opdk-setup-default-settings
+  - { role: apigee-opdk-set-reachable, reachable: False, server_type: '{{ server_type }}' }
+  - { role: apigee-opdk-update-component, apigee_component: '{{ upgrade_component }}' }
+  - { role: apigee-opdk-set-reachable, reachable: True, server_type: '{{ server_type }}' }
