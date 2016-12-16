@@ -3,48 +3,57 @@
 
 - include: components/opdk-upgrade-component.yml
   vars:
+    update_apigee_service: true
     hosts: ms
     upgrade_component: ldap
 
 - include: components/opdk-upgrade-component.yml
   vars:
+    update_apigee_service: true
     hosts: ds
     upgrade_component: cs
 
 - include: components/opdk-upgrade-component.yml
   vars:
+    update_apigee_service: true
     hosts: ds
     upgrade_component: zk
 
 - include: components/opdk-upgrade-reachability-component.yml
   vars:
+    update_apigee_service: true
     hosts: qpid
     server_type_name: qs
     upgrade_component: qpid
 
 - include: components/opdk-upgrade-reachability-component.yml
   vars:
+    update_apigee_service: true
     hosts: pg
     server_type_name: ps
     upgrade_component: edge
 
 - include: components/opdk-upgrade-component.yml
   vars:
+    update_apigee_service: true
     hosts: ds[0,2]
     upgrade_component: edge
 
 - include: components/opdk-upgrade-component.yml
   vars:
+    update_apigee_service: true
     hosts: ms
     upgrade_component: edge
 
 - include: components/opdk-upgrade-reachability-component.yml
   vars:
+    update_apigee_service: true
     hosts: rmp
     server_type_name: router
     upgrade_component: edge
 
 - include: components/opdk-upgrade-component.yml
   vars:
+    update_apigee_service: true
     hosts: ms
     upgrade_component: ui
