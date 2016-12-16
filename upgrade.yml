@@ -3,67 +3,48 @@
 
 - include: components/opdk-upgrade-component.yml
   vars:
-    hosts: ds[0]
-    upgrade_component: ds
+    hosts: ms
+    upgrade_component: ldap
 
 - include: components/opdk-upgrade-component.yml
   vars:
-    hosts: ms[0]
-    upgrade_component: ms
+    hosts: ds
+    upgrade_component: cs
+
+- include: components/opdk-upgrade-component.yml
+  vars:
+    hosts: ds
+    upgrade_component: zk
 
 - include: components/opdk-upgrade-reachability-component.yml
   vars:
-    hosts: rmp[0]
-    server_type: router
-    upgrade_component: r
+    hosts: qpid
+    server_type_name: qs
+    upgrade_component: qpid
 
-#- hosts: rmp
-#  tasks:
-#  - include: configuration/opdk-set-reachable.yml
-#    vars:
-#      hosts: '{{ inventory_hostname }}'
-#      reachability: 'false'
-#
-#  - include: components/opdk-upgrade-component.yml
-#    vars:
-#      hosts: '{{ inventory_hostname }}'
-#      upgrade_component: rmp
-#
-#  - include: configuration/opdk-set-reachable.yml
-#    vars:
-#      hosts: '{{ inventory_hostname }}'
-#      reachability: 'true'
-#
-#- hosts: qpid
-#  tasks:
-#  - include: configuration/opdk-set-reachable.yml
-#    vars:
-#      hosts: '{{ inventory_hostname }}'
-#      reachability: 'false'
-#
-#  - include: components/opdk-upgrade-component.yml
-#    vars:
-#      hosts: '{{ inventory_hostname }}'
-#      upgrade_component: qs
-#
-#  - include: configuration/opdk-set-reachable.yml
-#    vars:
-#      hosts: '{{ inventory_hostname }}'
-#      reachability: 'true'
-#
-#- hosts: pg
-#  tasks:
-#  - include: configuration/opdk-set-reachable.yml
-#    vars:
-#      hosts: '{{ inventory_hostname }}'
-#      reachability: 'false'
-#
-#  - include: components/opdk-upgrade-component.yml
-#    vars:
-#      hosts: '{{ inventory_hostname }}'
-#      upgrade_component: ps
-#
-#  - include: configuration/opdk-set-reachable.yml
-#    vars:
-#      hosts: '{{ inventory_hostname }}'
-#      reachability: 'true'
+- include: components/opdk-upgrade-reachability-component.yml
+  vars:
+    hosts: pg
+    server_type_name: ps
+    upgrade_component: edge
+
+- include: components/opdk-upgrade-component.yml
+  vars:
+    hosts: ds[0,2]
+    upgrade_component: edge
+
+- include: components/opdk-upgrade-component.yml
+  vars:
+    hosts: ms
+    upgrade_component: edge
+
+- include: components/opdk-upgrade-reachability-component.yml
+  vars:
+    hosts: rmp
+    server_type_name: router
+    upgrade_component: edge
+
+- include: components/opdk-upgrade-component.yml
+  vars:
+    hosts: ms
+    upgrade_component: ui

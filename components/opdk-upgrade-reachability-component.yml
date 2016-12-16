@@ -4,8 +4,12 @@
   - ~/.apigee/credentials.yml
   vars:
     opdk_version: 4.16.09
+  vars_files:
+  - ~/.apigee/credentials.yml
   roles:
-  - apigee-opdk-setup-default-settings
-  - { role: apigee-opdk-set-reachable, reachable: False, server_type: '{{ server_type }}' }
+  - apigee-opdk-setup-bootstrap
+  - apigee-opdk-setup-component-installer
+  - { role: apigee-opdk-set-reachable, reachability: False, server_type: '{{ server_type_name }}' }
+#  - { role: apigee-opdk-setup-component, profile: '{{ component_profile }}' }
   - { role: apigee-opdk-update-component, apigee_component: '{{ upgrade_component }}' }
-  - { role: apigee-opdk-set-reachable, reachable: True, server_type: '{{ server_type }}' }
+  - { role: apigee-opdk-set-reachable, reachability: True, server_type: '{{ server_type_name }}' }
