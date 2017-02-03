@@ -19,7 +19,7 @@
     hosts: ds
     upgrade_component: zk
 
-- include: components/opdk-upgrade-reachability-component.yml
+- include: components/opdk-iptables-block.yml
   vars:
     update_apigee_service: true
     hosts: qpid
