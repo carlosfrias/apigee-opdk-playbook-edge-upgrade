@@ -1,23 +1,37 @@
 ---
 - include: configuration/update_cache.yml
+  tags:
+  - ds
+  - ms
+  - qpid
+  - rmp
+  - pg
+  - pgmaster
+  - pgstandby
 
 - include: components/opdk-upgrade-component.yml
   vars:
     update_apigee_service: true
     hosts: ms
     upgrade_component: ldap
+  tags:
+  - ms
 
 - include: components/opdk-upgrade-component.yml
   vars:
     update_apigee_service: true
     hosts: ds
     upgrade_component: cs
+  tags:
+  - ds
 
 - include: components/opdk-upgrade-component.yml
   vars:
     update_apigee_service: true
     hosts: ds
     upgrade_component: zk
+  tags:
+  - zk
 
 - include: components/opdk-iptables-block.yml
   vars:
@@ -25,6 +39,8 @@
     hosts: qpid
     server_type_name: qs
     upgrade_component: qpid
+  tags:
+  - qpid
 
 - include: components/opdk-upgrade-reachability-component.yml
   vars:
@@ -32,18 +48,24 @@
     hosts: pg
     server_type_name: ps
     upgrade_component: edge
+  tags:
+  - pg
 
 - include: components/opdk-upgrade-component.yml
   vars:
     update_apigee_service: true
     hosts: ds[0,2]
     upgrade_component: edge
+  tags:
+  - ds
 
 - include: components/opdk-upgrade-component.yml
   vars:
     update_apigee_service: true
     hosts: ms
     upgrade_component: edge
+  tags:
+  - ms
 
 - include: components/opdk-upgrade-reachability-component.yml
   vars:
@@ -51,9 +73,13 @@
     hosts: rmp
     server_type_name: router
     upgrade_component: edge
+  tags:
+  - rmp
 
 - include: components/opdk-upgrade-component.yml
   vars:
     update_apigee_service: true
     hosts: ms
     upgrade_component: ui
+  tags:
+  - ui
