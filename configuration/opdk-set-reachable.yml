@@ -4,6 +4,7 @@
   vars_files:
   - ~/.apigee/credentials.yml
   roles:
+  - apigee-opdk-setup-default-settings
   - { role: apigee-opdk-set-reachable, reachable: '{{ reachability }}', server_type: 'router' }
   - { role: apigee-opdk-set-reachable, reachable: '{{ reachability }}', server_type: 'mp' }
   tags:

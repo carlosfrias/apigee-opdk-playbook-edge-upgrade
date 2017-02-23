@@ -1,8 +1,11 @@
 ---
 - include: configuration/update_cache.yml
   tags:
+  - cache
   - ds
+  - ds_edge
   - ms
+  - ms_edge
   - qpid
   - rmp
   - pg
@@ -54,10 +57,10 @@
 - include: components/opdk-upgrade-component.yml
   vars:
     update_apigee_service: true
-    hosts: ds[0,2]
+    hosts: ds
     upgrade_component: edge
   tags:
-  - ds
+  - ds_edge
 
 - include: components/opdk-upgrade-component.yml
   vars:
@@ -65,7 +68,7 @@
     hosts: ms
     upgrade_component: edge
   tags:
-  - ms
+  - ms_edge
 
 - include: components/opdk-upgrade-reachability-component.yml
   vars:
