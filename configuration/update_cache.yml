@@ -1,5 +1,6 @@
 ---
 - hosts: planet
+  strategy: free
   vars_files:
   - ~/.apigee/credentials.yml
   pre_tasks:
