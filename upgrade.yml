@@ -4,8 +4,8 @@
   tags:
   - cache
   - dc-1
-  - dc-1-ds
-  - dc-1-ds_edge
+  - dc-1-cs
+  - dc-1-cs_edge
   - dc-1-ms
   - dc-1-ui
   - dc-1-ms_edge
@@ -14,6 +14,8 @@
   - dc-1-pg
   - dc-1-pgmaster
   - dc-1-pgstandby
+  - dc-1-cs-zk
+  - dc-1-zk
 
 - hosts: planet
   serial: 1
@@ -32,24 +34,14 @@
     hosts: dc-1-ds
     upgrade_component: cs,zk
   tags:
-  - ds-zk
+  - cs-zk
   - ds
-  - dc-1-ds
+  - dc-1-cs
   - dc-1
   - zk
   - dc-1-zk
   - dc-1
-
-#- name: Upgrade DC-1 Zookeeper
-#  include: components/opdk-upgrade-component.yml
-#  vars:
-#    update_apigee_service: true
-#    hosts: dc-1-ds
-#    upgrade_component: zk
-#  tags:
-#  - zk
-#  - dc-1-zk
-#  - dc-1
+  - dc-1-cs-zk
 
 - name: Upgrade DC-1 qpid
   include: components/opdk-iptables-block.yml
@@ -225,13 +217,14 @@
   - dc-1
 
 #-------------------------------------
+
 - name: Update Ansible cache
   include: configuration/update_cache.yml
   tags:
   - cache
   - dc-2
-  - dc-2-ds
-  - dc-2-ds_edge
+  - dc-2-cs
+  - dc-2-cs_edge
   - dc-2-ms
   - dc-2-ui
   - dc-2-ms_edge
@@ -256,22 +249,16 @@
   vars:
     update_apigee_service: true
     hosts: dc-2-ds
-    upgrade_component: cs
+    upgrade_component: cs,zk
   tags:
+  - cs-zk
   - ds
-  - dc-2-ds
+  - dc-2-cs
   - dc-2
-
-- name: Upgrade dc-2 Zookeeper
-  include: components/opdk-upgrade-component.yml
-  vars:
-    update_apigee_service: true
-    hosts: dc-2-ds
-    upgrade_component: zk
-  tags:
   - zk
   - dc-2-zk
   - dc-2
+  - dc-2-cs-zk
 
 - name: Upgrade dc-2 qpid
   include: components/opdk-iptables-block.yml
@@ -289,32 +276,23 @@
   include: components/opdk-upgrade-component.yml
   vars:
     update_apigee_service: true
-    hosts: dc-2-ms
+    hosts: dc-2-ldap
     upgrade_component: ldap
   tags:
   - ldap
   - dc-2-ldap
   - dc-2
 
-- name: Upgrade dc-2 ui
-  include: components/opdk-upgrade-component.yml
-  vars:
-    update_apigee_service: true
-    hosts: dc-2-ui
-    upgrade_component: ui
-  tags:
-  - ui
-  - dc-2-ui
-  - dc-2
-
 - name: Upgrade dc-2 ms
   include: components/opdk-upgrade-component.yml
   vars:
     update_apigee_service: true
-    hosts: dc-2-ms
+    hosts: dc-2-qpid,dc-2-ms
     upgrade_component: edge
   tags:
+  - qpid
   - ms
+  - dc-2-qpid
   - dc-2-ms
   - dc-2
 
@@ -330,16 +308,27 @@
   - dc-2-rmp
   - dc-2
 
-- name: Stop dc-2 Qpid components
-  hosts: dc-2-qpid
-  roles:
-  - { role:  apigee-opdk-stop-components, component_name: 'edge-qpid-server', tags: ['dc-2-pg', 'dc-2'] }
+- name: Upgrade dc-2 ui
+  include: components/opdk-upgrade-component.yml
+  vars:
+    update_apigee_service: true
+    hosts: dc-2-ui
+    upgrade_component: ui
+  tags:
+  - ui
+  - dc-2-ui
+  - dc-2
 
 - name: Stop dc-2 Postgres components
   hosts: dc-2-ps
   roles:
   - { role:  apigee-opdk-stop-components, component_name: 'edge-postgres-server', tags: ['dc-2-pg', 'dc-2']}
   - { role:  apigee-opdk-stop-components, component_name: 'apigee-postgresql', tags: ['dc-2-pg', 'dc-2'] }
+
+- name: Stop dc-2 Qpid components
+  hosts: dc-2-qpid
+  roles:
+  - { role:  apigee-opdk-stop-components, component_name: 'edge-qpid-server', tags: ['dc-2-pg', 'dc-2'] }
 
 - name: Upgrade dc-2 PS component
   include: components/opdk-upgrade-component.yml
