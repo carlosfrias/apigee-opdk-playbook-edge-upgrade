@@ -19,8 +19,6 @@
   serial: 1
   vars_files:
   - ~/.apigee/credentials.yml
-  roles:
-  - apigee-opdk-setup-default-settings
   tasks:
   - name: All components should be running
     shell: "{{ apigee_all }} start"
@@ -32,22 +30,26 @@
   vars:
     update_apigee_service: true
     hosts: dc-1-ds
-    upgrade_component: cs
+    upgrade_component: cs,zk
   tags:
+  - ds-zk
   - ds
   - dc-1-ds
   - dc-1
-
-- name: Upgrade DC-1 Zookeeper
-  include: components/opdk-upgrade-component.yml
-  vars:
-    update_apigee_service: true
-    hosts: dc-1-ds
-    upgrade_component: zk
-  tags:
   - zk
   - dc-1-zk
   - dc-1
+
+#- name: Upgrade DC-1 Zookeeper
+#  include: components/opdk-upgrade-component.yml
+#  vars:
+#    update_apigee_service: true
+#    hosts: dc-1-ds
+#    upgrade_component: zk
+#  tags:
+#  - zk
+#  - dc-1-zk
+#  - dc-1
 
 - name: Upgrade DC-1 qpid
   include: components/opdk-iptables-block.yml
@@ -65,33 +67,26 @@
   include: components/opdk-upgrade-component.yml
   vars:
     update_apigee_service: true
-    hosts: dc-1-ms
+    hosts: dc-1-ldap
     upgrade_component: ldap
   tags:
   - ldap
   - dc-1-ldap
   - dc-1
 
-- name: Upgrade DC-1 ui
-  include: components/opdk-upgrade-component.yml
-  vars:
-    update_apigee_service: true
-    hosts: dc-1-ui
-    upgrade_component: ui
-  tags:
-  - ui
-  - dc-1-ui
-  - dc-1
-
 - name: Upgrade DC-1 ms
   include: components/opdk-upgrade-component.yml
   vars:
     update_apigee_service: true
-    hosts: dc-1-ms
+    hosts: dc-1-qpid,dc-1-ui
     upgrade_component: edge
   tags:
-  - ms
-  - dc-1-ms
+  - rmp
+  - qpid
+  - ui
+  - dc-1-rmp
+  - dc-1-qpid
+  - dc-1-rui
   - dc-1
 
 - name: Upgrade DC-1 rmp
@@ -106,18 +101,27 @@
   - dc-1-rmp
   - dc-1
 
-- name: Stop DC-1 Qpid components
-  hosts: dc-1-qpid
-  roles:
-  - { role: apigee-opdk-setup-default-settings, tags: ['dc-1-pg', 'dc-1'] }
-  - { role:  apigee-opdk-stop-components, component_name: 'edge-qpid-server', tags: ['dc-1-pg', 'dc-1'] }
+- name: Upgrade DC-1 ui
+  include: components/opdk-upgrade-component.yml
+  vars:
+    update_apigee_service: true
+    hosts: dc-1-ui
+    upgrade_component: ui
+  tags:
+  - ui
+  - dc-1-ui
+  - dc-1
 
 - name: Stop DC-1 Postgres components
   hosts: dc-1-ps
   roles:
-  - { role: apigee-opdk-setup-default-settings, tags: ['dc-1-pg', 'dc-1'] }
   - { role:  apigee-opdk-stop-components, component_name: 'edge-postgres-server', tags: ['dc-1-pg', 'dc-1']}
   - { role:  apigee-opdk-stop-components, component_name: 'apigee-postgresql', tags: ['dc-1-pg', 'dc-1'] }
+
+- name: Stop DC-1 Qpid components
+  hosts: dc-1-qpid
+  roles:
+  - { role:  apigee-opdk-stop-components, component_name: 'edge-qpid-server', tags: ['dc-1-pg', 'dc-1'] }
 
 - name: Upgrade DC-1 PS component
   include: components/opdk-upgrade-component.yml
@@ -136,8 +140,6 @@
   serial: 1
   vars_files:
   - ~/.apigee/credentials.yml
-  roles:
-  - apigee-opdk-setup-default-settings
   tasks:
   - name: PGMaster DB upgrade
     shell: '{{ apigee_service }} apigee-postgresql db_upgrade'
@@ -163,7 +165,6 @@
   vars_files:
   - ~/.apigee/credentials.yml
   roles:
-  - apigee-opdk-setup-default-settings
   - { role:  apigee-opdk-start-components, component_name: 'edge-postgres-server', tags: ['dc-1-pg', 'dc-1']  }
   - { role:  apigee-opdk-start-components, component_name: 'apigee-postgresql', tags: ['dc-1-pg', 'dc-1']  }
 
@@ -177,8 +178,6 @@
   serial: 1
   vars_files:
   - ~/.apigee/credentials.yml
-  roles:
-  - apigee-opdk-setup-default-settings
   tasks:
   - name: Validate this is postgresql master
     shell: "{{ apigee_service }} apigee-postgresql postgres-check-master"
@@ -192,8 +191,6 @@
   serial: 1
   vars_files:
   - ~/.apigee/credentials.yml
-  roles:
-  - apigee-opdk-setup-default-settings
   tasks:
   - name: Remove pgdata folder
     file:
@@ -250,8 +247,6 @@
   serial: 1
   vars_files:
   - ~/.apigee/credentials.yml
-  roles:
-  - apigee-opdk-setup-default-settings
   tasks:
   - name: All components should be running
     shell: "{{ apigee_all }} start"
@@ -340,13 +335,11 @@
 - name: Stop dc-2 Qpid components
   hosts: dc-2-qpid
   roles:
-  - { role: apigee-opdk-setup-default-settings, tags: ['dc-2-pg', 'dc-2'] }
   - { role:  apigee-opdk-stop-components, component_name: 'edge-qpid-server', tags: ['dc-2-pg', 'dc-2'] }
 
 - name: Stop dc-2 Postgres components
   hosts: dc-2-ps
   roles:
-  - { role: apigee-opdk-setup-default-settings, tags: ['dc-2-pg', 'dc-2'] }
   - { role:  apigee-opdk-stop-components, component_name: 'edge-postgres-server', tags: ['dc-2-pg', 'dc-2']}
   - { role:  apigee-opdk-stop-components, component_name: 'apigee-postgresql', tags: ['dc-2-pg', 'dc-2'] }
 
@@ -367,8 +360,6 @@
   serial: 1
   vars_files:
   - ~/.apigee/credentials.yml
-  roles:
-  - apigee-opdk-setup-default-settings
   tasks:
   - name: PGMaster DB upgrade
     shell: '{{ apigee_service }} apigee-postgresql db_upgrade'
@@ -394,7 +385,6 @@
   vars_files:
   - ~/.apigee/credentials.yml
   roles:
-  - apigee-opdk-setup-default-settings
   - { role:  apigee-opdk-start-components, component_name: 'edge-postgres-server', tags: ['dc-2-pg', 'dc-2']  }
   - { role:  apigee-opdk-start-components, component_name: 'apigee-postgresql', tags: ['dc-2-pg', 'dc-2']  }
 
@@ -408,8 +398,6 @@
   serial: 1
   vars_files:
   - ~/.apigee/credentials.yml
-  roles:
-  - apigee-opdk-setup-default-settings
   tasks:
   - name: Validate this is postgresql master
     shell: "{{ apigee_service }} apigee-postgresql postgres-check-master"
@@ -423,8 +411,6 @@
   serial: 1
   vars_files:
   - ~/.apigee/credentials.yml
-  roles:
-  - apigee-opdk-setup-default-settings
   tasks:
   - name: Remove pgdata folder
     file:

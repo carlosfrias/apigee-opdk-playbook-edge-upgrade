@@ -4,7 +4,6 @@
   vars_files:
   - ~/.apigee/credentials.yml
   roles:
-  - apigee-opdk-setup-default-settings
   - apigee-opdk-setup-bootstrap
   - apigee-opdk-setup-component-installer
   - { role: apigee-opdk-update-component, apigee_component: '{{ upgrade_component }}' }
