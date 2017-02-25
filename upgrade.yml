@@ -3,21 +3,9 @@
   include: configuration/update_cache.yml
   tags:
   - cache
-  - dc-1
-  - dc-1-cs
-  - dc-1-cs_edge
-  - dc-1-ms
-  - dc-1-ui
-  - dc-1-ms_edge
-  - dc-1-qpid
-  - dc-1-rmp
-  - dc-1-pg
-  - dc-1-pgmaster
-  - dc-1-pgstandby
-  - dc-1-cs-zk
-  - dc-1-zk
 
-- hosts: planet
+- name: All components should be running
+  hosts: planet
   serial: 1
   vars_files:
   - ~/.apigee/credentials.yml
@@ -31,102 +19,81 @@
   include: components/opdk-upgrade-component.yml
   vars:
     update_apigee_service: true
-    hosts: dc-1-ds
+    hosts: ds
     upgrade_component: cs,zk
   tags:
   - cs-zk
-  - ds
-  - dc-1-cs
-  - dc-1
-  - zk
-  - dc-1-zk
-  - dc-1
-  - dc-1-cs-zk
 
 - name: Upgrade DC-1 qpid
   include: components/opdk-iptables-block.yml
   vars:
     update_apigee_service: true
-    hosts: dc-1-qpid
+    hosts: qpid
     server_type_name: qs
     upgrade_component: edge
   tags:
   - qpid
-  - dc-1-qpid
-  - dc-1
 
 - name: Upgrade DC-1 ldap
   include: components/opdk-upgrade-component.yml
   vars:
     update_apigee_service: true
-    hosts: dc-1-ldap
+    hosts: ldap
     upgrade_component: ldap
   tags:
   - ldap
-  - dc-1-ldap
-  - dc-1
 
 - name: Upgrade DC-1 ms
   include: components/opdk-upgrade-component.yml
   vars:
     update_apigee_service: true
-    hosts: dc-1-qpid,dc-1-ms
+    hosts: qpid,ms
     upgrade_component: edge
   tags:
   - qpid
-  - ms
-  - dc-1-qpid
-  - dc-1-ms
-  - dc-1
 
 - name: Upgrade DC-1 rmp
   include: components/opdk-upgrade-reachability-component.yml
   vars:
     update_apigee_service: true
-    hosts: dc-1-rmp
+    hosts: rmp
     server_type_name: router
     upgrade_component: edge
   tags:
   - rmp
-  - dc-1-rmp
-  - dc-1
 
 - name: Upgrade DC-1 ui
   include: components/opdk-upgrade-component.yml
   vars:
     update_apigee_service: true
-    hosts: dc-1-ui
+    hosts: ui
     upgrade_component: ui
   tags:
   - ui
-  - dc-1-ui
-  - dc-1
 
 - name: Stop DC-1 Postgres components
-  hosts: dc-1-ps
+  hosts: ps
   roles:
-  - { role:  apigee-opdk-stop-components, component_name: 'edge-postgres-server', tags: ['dc-1-pg', 'dc-1']}
-  - { role:  apigee-opdk-stop-components, component_name: 'apigee-postgresql', tags: ['dc-1-pg', 'dc-1'] }
+  - { role:  apigee-opdk-stop-components, component_name: 'edge-postgres-server', tags: ['pg']}
+  - { role:  apigee-opdk-stop-components, component_name: 'apigee-postgresql', tags: ['pg'] }
 
 - name: Stop DC-1 Qpid components
-  hosts: dc-1-qpid
+  hosts: qpid
   roles:
-  - { role:  apigee-opdk-stop-components, component_name: 'edge-qpid-server', tags: ['dc-1-pg', 'dc-1'] }
+  - { role:  apigee-opdk-stop-components, component_name: 'edge-qpid-server', tags: ['pg'] }
 
 - name: Upgrade DC-1 PS component
   include: components/opdk-upgrade-component.yml
   vars:
     update_apigee_service: true
-    hosts: dc-1-pgmaster
+    hosts: pgmaster
     server_type_name: ps
     upgrade_component: ps
   tags:
   - pg
-  - dc-1-pg
-  - dc-1
 
 - name: Upgrade DC-1 Postgres master
-  hosts: dc-1-pgmaster
+  hosts: pgmaster
   serial: 1
   vars_files:
   - ~/.apigee/credentials.yml
@@ -134,37 +101,34 @@
   - name: PGMaster DB upgrade
     shell: '{{ apigee_service }} apigee-postgresql db_upgrade'
     tags:
-    - dc-1-pg
-    - dc-1
+    - pg
 
 - name: Upgrade DC-1 Postgres standby
   include: components/opdk-upgrade-component.yml
   vars:
     update_apigee_service: true
-    hosts: dc-1-pgstandby
+    hosts: pgstandby
     server_type_name: ps
     upgrade_component: ps
   tags:
   - pg
-  - dc-1-pg
-  - dc-1
 
 - name: Start DC-1 Postgres components
-  hosts: dc-1-ps
+  hosts: ps
   serial: 1
   vars_files:
   - ~/.apigee/credentials.yml
   roles:
-  - { role:  apigee-opdk-start-components, component_name: 'edge-postgres-server', tags: ['dc-1-pg', 'dc-1']  }
-  - { role:  apigee-opdk-start-components, component_name: 'apigee-postgresql', tags: ['dc-1-pg', 'dc-1']  }
+  - { role:  apigee-opdk-start-components, component_name: 'edge-postgres-server', tags: ['pg']  }
+  - { role:  apigee-opdk-start-components, component_name: 'apigee-postgresql', tags: ['pg']  }
 
 - name: Start DC-1 Qpid components
-  hosts: dc-1-qpid
+  hosts: qpid
   roles:
-  - { role:  apigee-opdk-start-components, component_name: 'edge-qpid-server', tags: ['dc-1-qpid', 'dc-1']  }
+  - { role:  apigee-opdk-start-components, component_name: 'edge-qpid-server', tags: ['pg']  }
 
 - name: Validate that DC-1 PG Master is master
-  hosts: dc-1-pgmaster
+  hosts: pgmaster
   serial: 1
   vars_files:
   - ~/.apigee/credentials.yml
@@ -173,11 +137,9 @@
     shell: "{{ apigee_service }} apigee-postgresql postgres-check-master"
     tags:
     - pg
-    - dc-1-pg
-    - dc-1
 
 - name: Setup and Validate that DC-1 PG Standby is standby
-  hosts: dc-1-pgstandby
+  hosts: pgstandby
   serial: 1
   vars_files:
   - ~/.apigee/credentials.yml
@@ -188,247 +150,22 @@
       state: absent
     tags:
     - pg
-    - dc-1-pg
-    - dc-1
 
   - name: Setup replication standby
     shell: "{{ apigee_service }} apigee-postgresql setup-replication-on-standby -f {{ opdk_installation_config_file }}"
     tags:
     - pg
-    - dc-1-pg
-    - dc-1
 
   - name: Validate this is postgresql standby
     shell: "{{ apigee_service }} apigee-postgresql postgres-check-standby"
     tags:
     - pg
-    - dc-1-pg
-    - dc-1
 
 - name: Upgrade DC-1 PG with edge for remaining components
   include: components/opdk-upgrade-component.yml
   vars:
     update_apigee_service: true
-    hosts: dc-1-pg
+    hosts: pg
     upgrade_component: edge
-  tags:
-  - dc-1-pg_edge
-  - pg
-  - dc-1
-
-#-------------------------------------
-
-- name: Update Ansible cache
-  include: configuration/update_cache.yml
-  tags:
-  - cache
-  - dc-2
-  - dc-2-cs
-  - dc-2-cs_edge
-  - dc-2-ms
-  - dc-2-ui
-  - dc-2-ms_edge
-  - dc-2-qpid
-  - dc-2-rmp
-  - dc-2-pg
-  - dc-2-pgmaster
-  - dc-2-pgstandby
-
-- hosts: planet
-  serial: 1
-  vars_files:
-  - ~/.apigee/credentials.yml
-  tasks:
-  - name: All components should be running
-    shell: "{{ apigee_all }} start"
-  tags:
-  - started
-
-- name: Upgrade dc-2 Cassandra
-  include: components/opdk-upgrade-component.yml
-  vars:
-    update_apigee_service: true
-    hosts: dc-2-ds
-    upgrade_component: cs,zk
-  tags:
-  - cs-zk
-  - ds
-  - dc-2-cs
-  - dc-2
-  - zk
-  - dc-2-zk
-  - dc-2
-  - dc-2-cs-zk
-
-- name: Upgrade dc-2 qpid
-  include: components/opdk-iptables-block.yml
-  vars:
-    update_apigee_service: true
-    hosts: dc-2-qpid
-    server_type_name: qs
-    upgrade_component: edge
-  tags:
-  - qpid
-  - dc-2-qpid
-  - dc-2
-
-- name: Upgrade dc-2 ldap
-  include: components/opdk-upgrade-component.yml
-  vars:
-    update_apigee_service: true
-    hosts: dc-2-ldap
-    upgrade_component: ldap
-  tags:
-  - ldap
-  - dc-2-ldap
-  - dc-2
-
-- name: Upgrade dc-2 ms
-  include: components/opdk-upgrade-component.yml
-  vars:
-    update_apigee_service: true
-    hosts: dc-2-qpid,dc-2-ms
-    upgrade_component: edge
-  tags:
-  - qpid
-  - ms
-  - dc-2-qpid
-  - dc-2-ms
-  - dc-2
-
-- name: Upgrade dc-2 rmp
-  include: components/opdk-upgrade-reachability-component.yml
-  vars:
-    update_apigee_service: true
-    hosts: dc-2-rmp
-    server_type_name: router
-    upgrade_component: edge
-  tags:
-  - rmp
-  - dc-2-rmp
-  - dc-2
-
-- name: Upgrade dc-2 ui
-  include: components/opdk-upgrade-component.yml
-  vars:
-    update_apigee_service: true
-    hosts: dc-2-ui
-    upgrade_component: ui
-  tags:
-  - ui
-  - dc-2-ui
-  - dc-2
-
-- name: Stop dc-2 Postgres components
-  hosts: dc-2-ps
-  roles:
-  - { role:  apigee-opdk-stop-components, component_name: 'edge-postgres-server', tags: ['dc-2-pg', 'dc-2']}
-  - { role:  apigee-opdk-stop-components, component_name: 'apigee-postgresql', tags: ['dc-2-pg', 'dc-2'] }
-
-- name: Stop dc-2 Qpid components
-  hosts: dc-2-qpid
-  roles:
-  - { role:  apigee-opdk-stop-components, component_name: 'edge-qpid-server', tags: ['dc-2-pg', 'dc-2'] }
-
-- name: Upgrade dc-2 PS component
-  include: components/opdk-upgrade-component.yml
-  vars:
-    update_apigee_service: true
-    hosts: dc-2-pgmaster
-    server_type_name: ps
-    upgrade_component: ps
   tags:
   - pg
-  - dc-2-pg
-  - dc-2
-
-- name: Upgrade dc-2 Postgres master
-  hosts: dc-2-pgmaster
-  serial: 1
-  vars_files:
-  - ~/.apigee/credentials.yml
-  tasks:
-  - name: PGMaster DB upgrade
-    shell: '{{ apigee_service }} apigee-postgresql db_upgrade'
-    tags:
-    - dc-2-pg
-    - dc-2
-
-- name: Upgrade dc-2 Postgres standby
-  include: components/opdk-upgrade-component.yml
-  vars:
-    update_apigee_service: true
-    hosts: dc-2-pgstandby
-    server_type_name: ps
-    upgrade_component: ps
-  tags:
-  - pg
-  - dc-2-pg
-  - dc-2
-
-- name: Start dc-2 Postgres components
-  hosts: dc-2-ps
-  serial: 1
-  vars_files:
-  - ~/.apigee/credentials.yml
-  roles:
-  - { role:  apigee-opdk-start-components, component_name: 'edge-postgres-server', tags: ['dc-2-pg', 'dc-2']  }
-  - { role:  apigee-opdk-start-components, component_name: 'apigee-postgresql', tags: ['dc-2-pg', 'dc-2']  }
-
-- name: Start dc-2 Qpid components
-  hosts: dc-2-qpid
-  roles:
-  - { role:  apigee-opdk-start-components, component_name: 'edge-qpid-server', tags: ['dc-2-qpid', 'dc-2']  }
-
-- name: Validate that dc-2 PG Master is master
-  hosts: dc-2-pgmaster
-  serial: 1
-  vars_files:
-  - ~/.apigee/credentials.yml
-  tasks:
-  - name: Validate this is postgresql master
-    shell: "{{ apigee_service }} apigee-postgresql postgres-check-master"
-    tags:
-    - pg
-    - dc-2-pg
-    - dc-2
-
-- name: Setup and Validate that dc-2 PG Standby is standby
-  hosts: dc-2-pgstandby
-  serial: 1
-  vars_files:
-  - ~/.apigee/credentials.yml
-  tasks:
-  - name: Remove pgdata folder
-    file:
-      path: "{{ apigee_installation_home}}/data/apigee-postgresql/pgdata"
-      state: absent
-    tags:
-    - pg
-    - dc-2-pg
-    - dc-2
-
-  - name: Setup replication standby
-    shell: "{{ apigee_service }} apigee-postgresql setup-replication-on-standby -f {{ opdk_installation_config_file }}"
-    tags:
-    - pg
-    - dc-2-pg
-    - dc-2
-
-  - name: Validate this is postgresql standby
-    shell: "{{ apigee_service }} apigee-postgresql postgres-check-standby"
-    tags:
-    - pg
-    - dc-2-pg
-    - dc-2
-
-- name: Upgrade dc-2 PG with edge for remaining components
-  include: components/opdk-upgrade-component.yml
-  vars:
-    update_apigee_service: true
-    hosts: dc-2-pg
-    upgrade_component: edge
-  tags:
-  - dc-2-pg_edge
-  - pg
-  - dc-2
