@@ -12,13 +12,21 @@
   tasks:
   - name: All components should be running
     shell: "{{ apigee_all }} start"
+    tags:
+    - started
+
+- name: Update the installer for planet
+  include: components/opdk-update-installer.yml
+  vars:
+    hosts: planet
+    upgrade_edge: true
   tags:
-  - started
+  - installer
 
 - name: Upgrade DC-1 Cassandra
   include: components/opdk-upgrade-component.yml
   vars:
-    update_apigee_service: true
+    upgrade_edge: true
     hosts: ds
     upgrade_component: cs,zk
   tags:
@@ -27,17 +35,17 @@
 - name: Upgrade DC-1 qpid
   include: components/opdk-iptables-block.yml
   vars:
-    update_apigee_service: true
+    upgrade_edge: true
     hosts: qpid
     server_type_name: qs
-    upgrade_component: edge
+    upgrade_component: qpid
   tags:
   - qpid
 
 - name: Upgrade DC-1 ldap
   include: components/opdk-upgrade-component.yml
   vars:
-    update_apigee_service: true
+    upgrade_edge: true
     hosts: ldap
     upgrade_component: ldap
   tags:
@@ -46,26 +54,61 @@
 - name: Upgrade DC-1 ms
   include: components/opdk-upgrade-component.yml
   vars:
-    update_apigee_service: true
+    upgrade_edge: true
     hosts: qpid,ms
     upgrade_component: edge
   tags:
-  - qpid
+  - qpid_edge
+
+- name: Unset reachability for router
+  include: components/opdk-set-reachability.yml
+  vars:
+    server_type_name: router
+    reachability_setting: False
+    hosts: rmp
+  tags:
+  - rmp_edge
+
+- name: Unset reachability for message rocessor
+  include: components/opdk-set-reachability.yml
+  vars:
+    server_type_name: mp
+    reachability_setting: False
+    hosts: rmp
+  tags:
+  - rmp_edge
 
 - name: Upgrade DC-1 rmp
-  include: components/opdk-upgrade-reachability-component.yml
+  include: components/opdk-upgrade-component.yml
   vars:
-    update_apigee_service: true
+    upgrade_edge: true
     hosts: rmp
-    server_type_name: router
     upgrade_component: edge
   tags:
-  - rmp
+  - rmp_edge
+
+- name: Unset reachability for router
+  include: components/opdk-set-reachability.yml
+  vars:
+    server_type_name: router
+    reachability_setting: True
+    hosts: rmp
+  tags:
+  - rmp_edge
+
+- name: Unset reachability for message rocessor
+  include: components/opdk-set-reachability.yml
+  vars:
+    server_type_name: mp
+    reachability_setting: True
+    hosts: rmp
+  tags:
+  - rmp_edge
 
 - name: Upgrade DC-1 ui
   include: components/opdk-upgrade-component.yml
   vars:
-    update_apigee_service: true
+    upgrade_edge: true
     hosts: ui
     upgrade_component: ui
   tags:
@@ -85,7 +128,7 @@
 - name: Upgrade DC-1 PS component
   include: components/opdk-upgrade-component.yml
   vars:
-    update_apigee_service: true
+    upgrade_edge: true
     hosts: pgmaster
     server_type_name: ps
     upgrade_component: ps
@@ -106,7 +149,7 @@
 - name: Upgrade DC-1 Postgres standby
   include: components/opdk-upgrade-component.yml
   vars:
-    update_apigee_service: true
+    upgrade_edge: true
     hosts: pgstandby
     server_type_name: ps
     upgrade_component: ps
@@ -164,7 +207,7 @@
 - name: Upgrade DC-1 PG with edge for remaining components
   include: components/opdk-upgrade-component.yml
   vars:
-    update_apigee_service: true
+    upgrade_edge: true
     hosts: pg
     upgrade_component: edge
   tags:

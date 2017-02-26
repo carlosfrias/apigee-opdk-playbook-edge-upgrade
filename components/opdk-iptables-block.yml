@@ -4,8 +4,6 @@
   vars_files:
   - ~/.apigee/credentials.yml
   roles:
-  - apigee-opdk-setup-bootstrap
-  - apigee-opdk-setup-component-installer
   - { role: apigee-opdk-set-reachable, reachability: False, server_type: '{{ server_type_name }}' }
   - { role: apigee-opdk-iptables-port-block, destination_port: '{{ qpid_messaging_port }}' }
   - { role: apigee-opdk-update-component, apigee_component: '{{ upgrade_component }}' }
