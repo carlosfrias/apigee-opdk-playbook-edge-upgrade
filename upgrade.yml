@@ -23,7 +23,7 @@
   tags:
   - installer
 
-- name: Upgrade DC-1 Cassandra
+- name: Upgrade Cassandra
   include: components/opdk-upgrade-component.yml
   vars:
     upgrade_edge: true
@@ -32,17 +32,19 @@
   tags:
   - cs-zk
 
-- name: Upgrade DC-1 qpid
-  include: components/opdk-iptables-block.yml
+- name: Upgrade qpid
+  include: components/opdk-upgrade-component.yml
   vars:
     upgrade_edge: true
     hosts: qpid
-    server_type_name: qs
+    server_type_names:
+    - qs
     upgrade_component: qpid
+    block_port: '{{ qpid_messaging_port }}'
   tags:
-  - qpid
+  - qpid_only
 
-- name: Upgrade DC-1 ldap
+- name: Upgrade ldap
   include: components/opdk-upgrade-component.yml
   vars:
     upgrade_edge: true
@@ -51,61 +53,29 @@
   tags:
   - ldap
 
-- name: Upgrade DC-1 ms
+- name: Upgrade ms
   include: components/opdk-upgrade-component.yml
   vars:
     upgrade_edge: true
     hosts: qpid,ms
     upgrade_component: edge
+    block_port: '{{ qpid_messaging_port }}'
   tags:
   - qpid_edge
 
-- name: Unset reachability for router
-  include: components/opdk-set-reachability.yml
-  vars:
-    server_type_name: router
-    reachability_setting: False
-    hosts: rmp
-  tags:
-  - rmp_edge
-
-- name: Unset reachability for message rocessor
-  include: components/opdk-set-reachability.yml
-  vars:
-    server_type_name: mp
-    reachability_setting: False
-    hosts: rmp
-  tags:
-  - rmp_edge
-
-- name: Upgrade DC-1 rmp
+- name: Upgrade rmp
   include: components/opdk-upgrade-component.yml
   vars:
+    server_type_names:
+    - router
+    - mp
     upgrade_edge: true
     hosts: rmp
     upgrade_component: edge
   tags:
   - rmp_edge
 
-- name: Unset reachability for router
-  include: components/opdk-set-reachability.yml
-  vars:
-    server_type_name: router
-    reachability_setting: True
-    hosts: rmp
-  tags:
-  - rmp_edge
-
-- name: Unset reachability for message rocessor
-  include: components/opdk-set-reachability.yml
-  vars:
-    server_type_name: mp
-    reachability_setting: True
-    hosts: rmp
-  tags:
-  - rmp_edge
-
-- name: Upgrade DC-1 ui
+- name: Upgrade ui
   include: components/opdk-upgrade-component.yml
   vars:
     upgrade_edge: true
@@ -114,18 +84,21 @@
   tags:
   - ui
 
-- name: Stop DC-1 Postgres components
-  hosts: ps
+- name: Stop Postgres components
+  hosts: pg
+  gather_facts: no
+  tags: ['pg']
   roles:
   - { role:  apigee-opdk-stop-components, component_name: 'edge-postgres-server', tags: ['pg']}
   - { role:  apigee-opdk-stop-components, component_name: 'apigee-postgresql', tags: ['pg'] }
 
-- name: Stop DC-1 Qpid components
+- name: Stop Qpid components
+  gather_facts: no
   hosts: qpid
   roles:
   - { role:  apigee-opdk-stop-components, component_name: 'edge-qpid-server', tags: ['pg'] }
 
-- name: Upgrade DC-1 PS component
+- name: Upgrade PS component
   include: components/opdk-upgrade-component.yml
   vars:
     upgrade_edge: true
@@ -135,8 +108,9 @@
   tags:
   - pg
 
-- name: Upgrade DC-1 Postgres master
+- name: Upgrade Postgres master
   hosts: pgmaster
+  gather_facts: no
   serial: 1
   vars_files:
   - ~/.apigee/credentials.yml
@@ -146,7 +120,7 @@
     tags:
     - pg
 
-- name: Upgrade DC-1 Postgres standby
+- name: Upgrade Postgres standby
   include: components/opdk-upgrade-component.yml
   vars:
     upgrade_edge: true
@@ -156,21 +130,23 @@
   tags:
   - pg
 
-- name: Start DC-1 Postgres components
+- name: Start Postgres components
   hosts: ps
   serial: 1
+  tags: ['pg']
   vars_files:
   - ~/.apigee/credentials.yml
   roles:
   - { role:  apigee-opdk-start-components, component_name: 'edge-postgres-server', tags: ['pg']  }
   - { role:  apigee-opdk-start-components, component_name: 'apigee-postgresql', tags: ['pg']  }
 
-- name: Start DC-1 Qpid components
+- name: Start Qpid components
   hosts: qpid
+  tags: ['pg']
   roles:
   - { role:  apigee-opdk-start-components, component_name: 'edge-qpid-server', tags: ['pg']  }
 
-- name: Validate that DC-1 PG Master is master
+- name: Validate that PG Master is master
   hosts: pgmaster
   serial: 1
   vars_files:
@@ -181,7 +157,7 @@
     tags:
     - pg
 
-- name: Setup and Validate that DC-1 PG Standby is standby
+- name: Setup and Validate that PG Standby is standby
   hosts: pgstandby
   serial: 1
   vars_files:
@@ -204,7 +180,7 @@
     tags:
     - pg
 
-- name: Upgrade DC-1 PG with edge for remaining components
+- name: Upgrade PG with edge for remaining components
   include: components/opdk-upgrade-component.yml
   vars:
     upgrade_edge: true
