@@ -53,15 +53,24 @@
   tags:
   - ldap
 
-- name: Upgrade ms
+- name: Upgrade qpid
   include: components/opdk-upgrade-component.yml
   vars:
     upgrade_edge: true
-    hosts: qpid,ms
+    hosts: qpid
     upgrade_component: edge
     block_port: '{{ qpid_messaging_port }}'
   tags:
   - qpid_edge
+
+- name: Upgrade ms
+  include: components/opdk-upgrade-component.yml
+  vars:
+    upgrade_edge: true
+    hosts: ms
+    upgrade_component: edge
+  tags:
+  - ms_edge
 
 - name: Upgrade rmp
   include: components/opdk-upgrade-component.yml
@@ -87,16 +96,17 @@
 - name: Stop Postgres components
   hosts: pg
   gather_facts: no
-  tags: ['pg']
+  tags: ['pg', 'pgstop']
   roles:
-  - { role:  apigee-opdk-stop-components, component_name: 'edge-postgres-server', tags: ['pg']}
-  - { role:  apigee-opdk-stop-components, component_name: 'apigee-postgresql', tags: ['pg'] }
+  - { role:  apigee-opdk-stop-components, component_name: 'edge-postgres-server' }
+  - { role:  apigee-opdk-stop-components, component_name: 'apigee-postgresql' }
 
 - name: Stop Qpid components
+  tags: ['pg', 'pgstop']
   gather_facts: no
   hosts: qpid
   roles:
-  - { role:  apigee-opdk-stop-components, component_name: 'edge-qpid-server', tags: ['pg'] }
+  - { role:  apigee-opdk-stop-components, component_name: 'edge-qpid-server' }
 
 - name: Upgrade PS component
   include: components/opdk-upgrade-component.yml
@@ -106,10 +116,23 @@
     server_type_name: ps
     upgrade_component: ps
   tags:
+  - pgmaster
+  - pg
+
+- name: Upgrade PS edge component
+  include: components/opdk-upgrade-component.yml
+  vars:
+    upgrade_edge: true
+    hosts: pgmaster
+    server_type_name: ps
+    upgrade_component: edge
+  tags:
+  - pgmaster_edge
   - pg
 
 - name: Upgrade Postgres master
   hosts: pgmaster
+  tags: ['pgmaster','pg']
   gather_facts: no
   serial: 1
   vars_files:
@@ -117,8 +140,6 @@
   tasks:
   - name: PGMaster DB upgrade
     shell: '{{ apigee_service }} apigee-postgresql db_upgrade'
-    tags:
-    - pg
 
 - name: Upgrade Postgres standby
   include: components/opdk-upgrade-component.yml
@@ -128,37 +149,38 @@
     server_type_name: ps
     upgrade_component: ps
   tags:
+  - pgstandby
   - pg
 
 - name: Start Postgres components
   hosts: ps
   serial: 1
-  tags: ['pg']
+  tags: ['pg', 'pgstart']
   vars_files:
   - ~/.apigee/credentials.yml
   roles:
-  - { role:  apigee-opdk-start-components, component_name: 'edge-postgres-server', tags: ['pg']  }
-  - { role:  apigee-opdk-start-components, component_name: 'apigee-postgresql', tags: ['pg']  }
+  - { role:  apigee-opdk-start-components, component_name: 'edge-postgres-server' }
+  - { role:  apigee-opdk-start-components, component_name: 'apigee-postgresql' }
 
 - name: Start Qpid components
   hosts: qpid
-  tags: ['pg']
+  tags: ['pg', 'pgstart']
   roles:
-  - { role:  apigee-opdk-start-components, component_name: 'edge-qpid-server', tags: ['pg']  }
+  - { role:  apigee-opdk-start-components, component_name: 'edge-qpid-server' }
 
 - name: Validate that PG Master is master
   hosts: pgmaster
+  tags: ['pg', 'pgmaster']
   serial: 1
   vars_files:
   - ~/.apigee/credentials.yml
   tasks:
   - name: Validate this is postgresql master
     shell: "{{ apigee_service }} apigee-postgresql postgres-check-master"
-    tags:
-    - pg
 
 - name: Setup and Validate that PG Standby is standby
   hosts: pgstandby
+  tags: ['pg', 'pgstandby']
   serial: 1
   vars_files:
   - ~/.apigee/credentials.yml
@@ -167,18 +189,12 @@
     file:
       path: "{{ apigee_installation_home}}/data/apigee-postgresql/pgdata"
       state: absent
-    tags:
-    - pg
 
   - name: Setup replication standby
     shell: "{{ apigee_service }} apigee-postgresql setup-replication-on-standby -f {{ opdk_installation_config_file }}"
-    tags:
-    - pg
 
   - name: Validate this is postgresql standby
     shell: "{{ apigee_service }} apigee-postgresql postgres-check-standby"
-    tags:
-    - pg
 
 - name: Upgrade PG with edge for remaining components
   include: components/opdk-upgrade-component.yml
@@ -188,3 +204,4 @@
     upgrade_component: edge
   tags:
   - pg
+  - pg_edge
