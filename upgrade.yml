@@ -6,14 +6,13 @@
 
 - name: All components should be running
   hosts: planet
+  tags: ['start']
   serial: 1
   vars_files:
   - ~/.apigee/credentials.yml
   tasks:
   - name: All components should be running
     shell: "{{ apigee_all }} start"
-    tags:
-    - started
 
 - name: Update the installer for planet
   include: components/opdk-update-installer.yml
@@ -31,6 +30,14 @@
     upgrade_component: cs,zk
   tags:
   - cs-zk
+
+- name: Restore qpid component that is mysteriously uninstalled
+  include: components/opdk-install-component.yml
+  vars:
+    hosts: 'dc-1-qpid'
+    component_profile: 'qs'
+  tags:
+  - qpid_reinstall
 
 - name: Upgrade qpid
   include: components/opdk-upgrade-component.yml
@@ -132,7 +139,7 @@
 
 - name: Upgrade Postgres master
   hosts: pgmaster
-  tags: ['pgmaster','pg']
+  tags: ['pgmaster_db_upgrade','pg']
   gather_facts: no
   serial: 1
   vars_files:
