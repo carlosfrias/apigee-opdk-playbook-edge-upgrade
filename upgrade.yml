@@ -210,7 +210,7 @@
 
 - name: Validate that PG Master is master
   hosts: pgmaster
-  tags: ['pg', 'pgmaster_check']
+  tags: ['pg', 'pgmaster_validate']
   serial: 1
   vars_files:
   - ~/.apigee/credentials.yml
@@ -241,15 +241,21 @@
   - name: Setup replication standby
     shell: "{{ apigee_service }} apigee-postgresql setup-replication-on-standby -f {{ opdk_installation_config_file }}"
 
-  - name: Make sure everything is started
+  - name: Setup replication on standby completing work
+    pause:
+      seconds: 10
+
+  - name: Start all components
     shell: "{{ apigee_all }} start"
 
-  - name: Give it time to start up
+  - name: Component start is completing
     pause:
       seconds: 10
 
   - name: Validate this is postgresql standby
     shell: "{{ apigee_service }} apigee-postgresql postgres-check-standby"
+    tags:
+    - pgstandby_validate
 
 - name: Upgrade PG with edge for remaining components
   include: components/opdk-upgrade-component.yml
