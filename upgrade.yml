@@ -137,6 +137,39 @@
   - pgmaster_edge
   - pg
 
+- name: Restore broken pg_control file on pgmaster
+  hosts: pgmaster
+  serial: 1
+  become: yes
+  tags: ['pg_control']
+  vars:
+    pg_control_old: "{{ apigee_installation_home }}/data/apigee-postgresql/pgdata-9.3.old/global/pg_control.old"
+    pg_control: "{{ apigee_installation_home }}/data/apigee-postgresql/pgdata-9.3.old/global/pg_control"
+  tasks:
+  - name: Determine if old pg_control is incorrectly managed
+    stat:
+      path: "{{ pg_control_old }}"
+    register: pg_control
+
+  - block:
+    - block:
+      - name: Restore pg_control file
+        copy:
+          src: "{{ apigee_installation_home }}/data/apigee-postgresql/pgdata-9.3.old/global/pg_control.old"
+          dest: "{{ apigee_installation_home }}/data/apigee-postgresql/pgdata-9.3.old/global/pg_control"
+
+      rescue:
+      - name: Restore pg_control file failed, trying again
+        shell: "sudo cp {{ apigee_installation_home }}/data/apigee-postgresql/pgdata-9.3.old/global/pg_control.old {{ apigee_installation_home }}/data/apigee-postgresql/pgdata-9.3.old/global/pg_control"
+
+    - name: Set pg_control file ownership
+      file:
+        path: "{{ apigee_installation_home }}/data/apigee-postgresql/pgdata-9.3.old/global/pg_control"
+        owner: "{{ opdk_user_name }}"
+        group: "{{ opdk_group_name }}"
+
+    when: pg_control.stat.exists
+
 - name: Upgrade Postgres master
   hosts: pgmaster
   tags: ['pgmaster_db_upgrade','pg']
@@ -166,18 +199,18 @@
   vars_files:
   - ~/.apigee/credentials.yml
   roles:
-  - { role:  apigee-opdk-start-components, component_name: 'edge-postgres-server' }
-  - { role:  apigee-opdk-start-components, component_name: 'apigee-postgresql' }
+  - { role:  apigee-opdk-start-components, component_name: 'edge-postgres-server', component_start_delay: 10 }
+  - { role:  apigee-opdk-start-components, component_name: 'apigee-postgresql', component_start_delay: 10 }
 
 - name: Start Qpid components
   hosts: qpid
   tags: ['pg', 'pgstart']
   roles:
-  - { role:  apigee-opdk-start-components, component_name: 'edge-qpid-server' }
+  - { role:  apigee-opdk-start-components, component_name: 'edge-qpid-server', component_start_delay: 10 }
 
 - name: Validate that PG Master is master
   hosts: pgmaster
-  tags: ['pg', 'pgmaster']
+  tags: ['pg', 'pgmaster_check']
   serial: 1
   vars_files:
   - ~/.apigee/credentials.yml
@@ -197,6 +230,14 @@
       path: "{{ apigee_installation_home}}/data/apigee-postgresql/pgdata"
       state: absent
 
+  - name: Restore empty pgdata folder
+    file:
+      path: "{{ apigee_installation_home}}/data/apigee-postgresql/pgdata"
+      state: directory
+      owner: "{{ opdk_user_name }}"
+      group: "{{ opdk_group_name }}"
+      mode: "0700"
+
   - name: Setup replication standby
     shell: "{{ apigee_service }} apigee-postgresql setup-replication-on-standby -f {{ opdk_installation_config_file }}"
 
@@ -212,3 +253,88 @@
   tags:
   - pg
   - pg_edge
+
+- include: validations/opdk-setup-log-files.yml
+  vars:
+    hosts: dc-1-ds
+  tags:
+  - logs
+  - dc-1
+
+- include: validations/opdk-setup-log-files.yml
+  vars:
+    hosts: dc-2-ds
+  tags:
+  - logs
+  - dc-2
+
+- include: validations/opdk-setup-log-files.yml
+  vars:
+    hosts: dc-1-ms
+  tags:
+  - logs
+  - dc-1
+
+- include: validations/opdk-setup-log-files.yml
+  vars:
+    hosts: dc-2-ms
+  tags:
+  - logs
+  - dc-2
+
+- include: validations/opdk-setup-log-files.yml
+  vars:
+    hosts: dc-1-rmp
+  tags:
+  - logs
+  - dc-1
+
+- include: validations/opdk-setup-log-files.yml
+  vars:
+    hosts: dc-2-rmp
+  tags:
+  - logs
+  - dc-2
+
+- include: validations/opdk-setup-log-files.yml
+  vars:
+    hosts: dc-1-qpid
+  tags:
+  - logs
+  - dc-1
+
+- include: validations/opdk-setup-log-files.yml
+  vars:
+    hosts: dc-2-qpid
+  tags:
+  - logs
+  - dc-2
+
+- include: validations/opdk-setup-log-files.yml
+  vars:
+    hosts: dc-1-pgmaster
+  tags:
+  - logs
+  - dc-1
+
+- include: validations/opdk-setup-log-files.yml
+  vars:
+    hosts: dc-2-pgmaster
+  tags:
+  - logs
+  - dc-2
+
+- include: validations/opdk-setup-log-files.yml
+  vars:
+    hosts: dc-1-pgstandby
+  tags:
+  - logs
+  - dc-1
+
+- include: validations/opdk-setup-log-files.yml
+  vars:
+    hosts: dc-2-pgstandby
+  tags:
+  - logs
+  - dc-2
+
