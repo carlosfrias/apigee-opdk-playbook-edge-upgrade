@@ -1,6 +1,8 @@
 ---
 - src: https://github.com/carlosfrias/apigee-opdk-setup-component-installer
 
+- src: https://github.com/carlosfrias/apigee-opdk-setup-component
+
 - src: https://github.com/carlosfrias/apigee-opdk-setup-default-settings
 
 - src: https://github.com/carlosfrias/apigee-opdk-set-reachable
