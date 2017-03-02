@@ -5,6 +5,7 @@
   - cache
 
 - name: All components should be running
+  gather_facts: no
   hosts: planet
   tags: ['start']
   serial: 1
@@ -140,6 +141,7 @@
 - name: Restore broken pg_control file on pgmaster
   hosts: pgmaster
   serial: 1
+  gather_facts: no
   become: yes
   tags: ['pg_control']
   vars:
@@ -195,6 +197,7 @@
 - name: Start Postgres components
   hosts: ps
   serial: 1
+  gather_facts: no
   tags: ['pg', 'pgstart']
   vars_files:
   - ~/.apigee/credentials.yml
@@ -212,6 +215,7 @@
   hosts: pgmaster
   tags: ['pg', 'pgmaster_validate']
   serial: 1
+  gather_facts: no
   vars_files:
   - ~/.apigee/credentials.yml
   tasks:
@@ -221,6 +225,7 @@
 - name: Setup and Validate that PG Standby is standby
   hosts: pgstandby
   tags: ['pg', 'pgstandby']
+  gather_facts: no
   serial: 1
   vars_files:
   - ~/.apigee/credentials.yml
