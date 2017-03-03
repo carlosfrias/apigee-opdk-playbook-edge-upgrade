@@ -28,3 +28,5 @@
 - src: https://github.com/carlosfrias/apigee-opdk-iptables-flush
 
 - src: https://github.com/carlosfrias/apigee-opdk-iptables-port-block
+
+- src: https://github.com/carlosfrias/apigee-opdk-cache-update.git
