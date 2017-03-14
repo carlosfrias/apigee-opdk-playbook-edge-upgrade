@@ -16,7 +16,6 @@
       destination_port: '{{ block_port }}',
       when: block_port is defined
     }
-
   - {
       role: apigee-opdk-update-component,
       apigee_component: '{{ upgrade_component }}'

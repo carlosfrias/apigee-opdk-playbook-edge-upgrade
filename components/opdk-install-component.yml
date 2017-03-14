@@ -3,6 +3,7 @@
   serial: 1
   gather_facts: no
   roles:
+  - apigee-opdk-setup-java-home
   - apigee-opdk-setup-component-installer
   - { role: apigee-opdk-setup-component, profile: '{{ component_profile }}' }
   tags:
