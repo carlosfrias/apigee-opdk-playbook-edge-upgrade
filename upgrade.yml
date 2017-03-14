@@ -13,8 +13,6 @@
   hosts: planet
   tags: ['start']
   serial: 1
-  vars_files:
-  - ~/.apigee/credentials.yml
   tasks:
   - name: All components should be running
     shell: "{{ apigee_all }} start"
@@ -125,7 +123,7 @@
   vars:
     upgrade_edge: true
     hosts: pgmaster
-    server_type_name: ps
+    server_type_names: ['ps']
     upgrade_component: ps
   tags:
   - pgmaster
@@ -136,7 +134,7 @@
   vars:
     upgrade_edge: true
     hosts: pgmaster
-    server_type_name: ps
+    server_type_names: ['ps']
     upgrade_component: edge
   tags:
   - pgmaster_edge
@@ -181,8 +179,6 @@
   tags: ['pgmaster_db_upgrade','pg']
   gather_facts: no
   serial: 1
-  vars_files:
-  - ~/.apigee/credentials.yml
   tasks:
   - name: PGMaster DB upgrade
     shell: '{{ apigee_service }} apigee-postgresql db_upgrade'
@@ -192,7 +188,7 @@
   vars:
     upgrade_edge: true
     hosts: pgstandby
-    server_type_name: ps
+    server_type_names: ['ps']
     upgrade_component: ps
   tags:
   - pgstandby
@@ -203,8 +199,6 @@
   serial: 1
   gather_facts: no
   tags: ['pg', 'pgstart']
-  vars_files:
-  - ~/.apigee/credentials.yml
   roles:
   - { role:  apigee-opdk-start-components, component_name: 'edge-postgres-server', component_start_delay: 1 }
   - { role:  apigee-opdk-start-components, component_name: 'apigee-postgresql', component_start_delay: 1 }
@@ -220,8 +214,6 @@
   tags: ['pg', 'pgmaster_validate']
   serial: 1
   gather_facts: no
-  vars_files:
-  - ~/.apigee/credentials.yml
   tasks:
   - name: Validate this is postgresql master
     shell: "{{ apigee_service }} apigee-postgresql postgres-check-master"
@@ -231,8 +223,6 @@
   tags: ['pg', 'pgstandby']
   gather_facts: no
   serial: 1
-  vars_files:
-  - ~/.apigee/credentials.yml
   tasks:
   - name: Remove pgdata folder
     file:
