@@ -34,14 +34,6 @@
   tags:
   - cs-zk
 
-- name: Restore qpid component that is mysteriously uninstalled
-  include: components/opdk-install-component.yml
-  vars:
-    hosts: 'qpid'
-    component_profile: 'qs'
-  tags:
-  - qpid_reinstall
-
 - name: Upgrade qpid
   include: components/opdk-upgrade-component.yml
   vars:
