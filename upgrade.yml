@@ -37,7 +37,7 @@
 - name: Restore qpid component that is mysteriously uninstalled
   include: components/opdk-install-component.yml
   vars:
-    hosts: 'dc-1-qpid'
+    hosts: 'qpid'
     component_profile: 'qs'
   tags:
   - qpid_reinstall
