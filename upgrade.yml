@@ -22,8 +22,7 @@
   vars:
     hosts: planet
     upgrade_edge: true
-  tags:
-  - installer
+  tags: ['installer']
 
 - name: Upgrade Cassandra
   include: components/opdk-upgrade-component.yml
@@ -31,8 +30,7 @@
     upgrade_edge: true
     hosts: ds
     upgrade_component: cs,zk
-  tags:
-  - cs-zk
+  tags: ['cs-zk']
 
 - name: Upgrade qpid
   include: components/opdk-upgrade-component.yml
@@ -43,8 +41,7 @@
     - qs
     upgrade_component: qpid
     block_port: '{{ qpid_messaging_port }}'
-  tags:
-  - qpid_only
+  tags: ['qpid']
 
 - name: Upgrade ldap
   include: components/opdk-upgrade-component.yml
@@ -52,8 +49,7 @@
     upgrade_edge: true
     hosts: ldap
     upgrade_component: ldap
-  tags:
-  - ldap
+  tags: ['ldap']
 
 - name: Upgrade qpid
   include: components/opdk-upgrade-component.yml
@@ -62,8 +58,7 @@
     hosts: qpid
     upgrade_component: edge
     block_port: '{{ qpid_messaging_port }}'
-  tags:
-  - qpid_edge
+  tags: ['qpid_edge']
 
 - name: Upgrade ms
   include: components/opdk-upgrade-component.yml
@@ -71,8 +66,7 @@
     upgrade_edge: true
     hosts: ms
     upgrade_component: edge
-  tags:
-  - ms_edge
+  tags: ['ms_edge']
 
 - name: Upgrade rmp
   include: components/opdk-upgrade-component.yml
@@ -83,8 +77,7 @@
     upgrade_edge: true
     hosts: rmp
     upgrade_component: edge
-  tags:
-  - rmp_edge
+  tags: ['rmp']
 
 - name: Upgrade ui
   include: components/opdk-upgrade-component.yml
@@ -92,8 +85,7 @@
     upgrade_edge: true
     hosts: ui
     upgrade_component: ui
-  tags:
-  - ui
+  tags: ['ui']
 
 - name: Stop Postgres components
   hosts: pg
@@ -137,7 +129,7 @@
   serial: 1
   gather_facts: no
   become: yes
-  tags: ['pg_control']
+  tags: ['pg', 'pg_control']
   vars:
     pg_control_old: "{{ apigee_installation_home }}/data/apigee-postgresql/pgdata-9.3.old/global/pg_control.old"
     pg_control: "{{ apigee_installation_home }}/data/apigee-postgresql/pgdata-9.3.old/global/pg_control"

@@ -1,7 +1,7 @@
 ---
 - name: Update the ansible cache
   hosts: planet
-  tags: ['cache']
+  tags: ['cache', 'apigee-pre-req' ]
   gather_facts: no
   vars_files:
   - ~/.apigee/credentials.yml
@@ -11,6 +11,7 @@
 - name: Rolling back installation and bootstrap
   hosts: '{{ hosts }}'
   gather_facts: no
+  tags: ['rollback']
   vars:
     remove_apigee: true
     opdk_version: 4.16.01
@@ -19,6 +20,7 @@
 
 - name: Bootstap to the specified version on attribute opdk_version
   include: components/opdk-install-component.yml
+  tags: ['install']
   vars:
     opdk_version: 4.16.01
     component_profile: "{{ component }}"
