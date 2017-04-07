@@ -34,3 +34,11 @@
 - src: https://github.com/carlosfrias/apigee-opdk-setup-java-home.git
 
 - src: https://github.com/carlosfrias/apigee-opdk-modules
+
+- src: https://github.com/carlosfrias/apigee-server-restart
+
+- src: https://github.com/carlosfrias/apigee-opdk-setup-postgres-standby
+
+- src: https://github.com/carlosfrias/apigee-opdk-cwc-update
+
+- src: https://github.com/carlosfrias/apigee-opdk-setup-postgres-db-upgrade
