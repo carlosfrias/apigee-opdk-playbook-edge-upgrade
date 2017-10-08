@@ -14,8 +14,8 @@
   - { role: apigee-opdk-setup-bootstrap-rollback, tags: ['rollback'], remove_apigee: true }
   - { role: apigee-server-restart, tags: ['restart-server'] }
   - { role: apigee-opdk-setup-java-home, tags: ['apigee-pre-req', 'java_home'] }
-  - { role: apigee-opdk-setup-silent-installation-config, tags: ['apigee-silent-config'], opdk_ldap_type: '2', when: "{{ groups['dc-2'] is defined }}" }
-  - { role: apigee-opdk-setup-silent-installation-config, tags: ['apigee-silent-config'], opdk_ldap_type: '1', when: "{{ groups['dc-2'] is not defined }}" }
+  - { role: apigee-opdk-setup-silent-installation-config, tags: ['apigee-silent-config'], opdk_ldap_type: '2', when: "{{ groups['dc2'] is defined }}" }
+  - { role: apigee-opdk-setup-silent-installation-config, tags: ['apigee-silent-config'], opdk_ldap_type: '1', when: "{{ groups['dc2'] is not defined }}" }
   - { role: apigee-opdk-setup-bootstrap, tags: ['apigee-pre-req', 'apigee-bootstrap'], upgrade_edge: true }
   - { role: apigee-opdk-setup-component-installer, tags: ['apigee-component'] }
   - { role: apigee-opdk-setup-component, profile: '{{ component }}',tags: ['apigee-component'] }

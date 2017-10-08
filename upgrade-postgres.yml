@@ -62,7 +62,7 @@
   roles:
   - { role: apigee-opdk-setup-postgres-=db-upgrade }
 
-- name: Upgrade Postgres standby in DC-1
+- name: Upgrade Postgres standby in dc1
   hosts: pgstandby
   serial: 1
   gather_facts: no
